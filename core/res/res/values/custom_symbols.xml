@@ -42,4 +42,6 @@
   <java-symbol type="integer" name="config_longPressOnAppSwitchKeyBehavior" />
   <java-symbol type="integer" name="config_longPressOnCameraKeyBehavior" />
 
+  <!-- Assist manager -->
+  <java-symbol type="string" name="no_assist_found" />
 </resources>
