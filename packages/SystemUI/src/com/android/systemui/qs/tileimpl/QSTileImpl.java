@@ -46,6 +46,7 @@ import com.android.systemui.plugins.qs.QSIconView;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTile.State;
 import com.android.systemui.qs.QSHost;
+import com.android.systemui.R;
 
 import java.util.ArrayList;
 
@@ -337,6 +338,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile {
     public abstract CharSequence getTileLabel();
 
     public static int getColorForState(Context context, int state) {
+        if (context.getResources().getBoolean(R.bool.disableQsTileTint)) return 0;
         switch (state) {
             case Tile.STATE_UNAVAILABLE:
                 return Utils.getDisabled(context,

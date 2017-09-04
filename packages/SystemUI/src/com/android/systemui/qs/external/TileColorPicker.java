@@ -27,10 +27,11 @@ public class TileColorPicker {
             android.R.attr.state_activated};
     @VisibleForTesting static final int[] INACTIVE_STATE_SET = {-android.R.attr.state_activated};
     private static TileColorPicker sInstance;
-
+    private Context mContext;
     private ColorStateList mColorStateList;
 
     private TileColorPicker(Context context) {
+        mContext = context;
         mColorStateList = context.getResources().
                 getColorStateList(R.color.tint_color_selector, context.getTheme());
     }
@@ -44,7 +45,7 @@ public class TileColorPicker {
 
     public int getColor(int state) {
         final int defaultColor = 0;
-
+        if (mContext.getResources().getBoolean(R.bool.disableExternalQSTileTint)) return defaultColor;
         switch (state) {
             case Tile.STATE_UNAVAILABLE:
                 return mColorStateList.getColorForState(DISABLE_STATE_SET, defaultColor);
