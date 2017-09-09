@@ -26,4 +26,6 @@
         or use apps not intended for Android Auto while driving.
     </string>
 
+    <string name="quick_settings_pip_label">PiP</string>
+
 </resources>
