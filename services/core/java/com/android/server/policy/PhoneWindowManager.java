@@ -3410,11 +3410,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
                 // If an incoming call is ringing and mIncallHomeBehavior=false, HOME is totally disabled.
                 TelecomManager telecomManager = getTelecommService();
-                if (telecomManager != null && telecomManager.isRinging()
-                        && !mIncallHomeBehavior) {
+                if (telecomManager != null) {
+Log.i(TAG, "lulz not null");
+ if(telecomManager.isRinging()) {
+Log.i(TAG, "lulz ringing");
+                        if( !mIncallHomeBehavior) {
                       Log.i(TAG, "Ignoring HOME; there's a ringing incoming call.");
                       return -1;
-                  }
+                  }}}
 
                 // Delay handling home if a double-tap is possible.
                 if (mDoubleTapOnHomeBehavior != DOUBLE_TAP_HOME_NOTHING) {
