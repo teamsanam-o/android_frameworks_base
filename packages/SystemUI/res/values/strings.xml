@@ -2028,7 +2028,4 @@
         been identified for them as running). [CHAR LIMIT=NONE] -->
     <string name="running_foreground_services_msg">Tap for details on battery and data usage</string>
 
-    <!-- PiP Tile -->
-    <string name="quick_settings_pip_label">PiP</string>
-
 </resources>
