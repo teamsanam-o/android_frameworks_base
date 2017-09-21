@@ -143,6 +143,7 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.NotificationMessagingUtil;
+import com.android.internal.util.custom.CustomUtils;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardHostView.OnDismissAction;
 import com.android.keyguard.KeyguardStatusView;
@@ -5327,6 +5328,46 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
     };
 
+    private CustomSettingsObserver mCustomSettingsObserver = new CustomSettingsObserver(mHandler);
+    private class CustomSettingsObserver extends ContentObserver {
+        CustomSettingsObserver(Handler handler) {
+            super(handler);
+        }
+
+        void observe() {
+            ContentResolver resolver = mContext.getContentResolver();
+            mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.NAVIGATION_BAR_SHOW),
+                    false, this, UserHandle.USER_ALL);
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            if (uri.equals(Settings.System.getUriFor(
+                    Settings.System.NAVIGATION_BAR_SHOW))) {
+                setShowNavBar();
+            }
+        }
+
+        public void update() {
+            setShowNavBar();
+        }
+    }
+
+    private void setShowNavBar() {
+        int showNavBar = Settings.System.getIntForUser(
+                mContext.getContentResolver(), Settings.System.NAVIGATION_BAR_SHOW,
+                -1, mCurrentUserId);
+        if (showNavBar != -1){
+            boolean showNavBarBool = showNavBar == 1;
+            if (showNavBarBool !=  mShowNavBar){
+                updateNavigationBar();
+            }
+        }
+    }
+
+    private boolean mShowNavBar;
+
     private RemoteViews.OnClickHandler mOnClickHandler = new RemoteViews.OnClickHandler() {
 
         @Override
@@ -7007,4 +7048,20 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
     }
     // End Extra BaseStatusBarMethods.
+
+    private void updateNavigationBar() {
+        mShowNavBar = CustomUtils.deviceSupportNavigationBarForUser(mContext, mCurrentUserId);
+        if (DEBUG) Log.v(TAG, "updateNavigationBar=" + mShowNavBar);
+
+        if (mShowNavBar) {
+            if (mNavigationBarView == null) {
+                createNavigationBar();
+            }
+        } else {
+            if (mNavigationBarView != null){
+                mWindowManager.removeViewImmediate(mNavigationBarView);
+                mNavigationBarView = null;
+            }
+        }
+    }
 }
