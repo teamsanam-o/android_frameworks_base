@@ -142,6 +142,7 @@ import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.statusbar.StatusBarIcon;
+import com.android.internal.util.custom.CustomUtils;
 import com.android.internal.util.NotificationMessagingUtil;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardHostView.OnDismissAction;
@@ -753,6 +754,39 @@ public class StatusBar extends SystemUI implements DemoMode,
     private NavigationBarFragment mNavigationBar;
     private View mNavigationBarView;
 
+    // Runtime navigation bar toggling
+    private class CustomSettingsObserver extends ContentObserver {
+        CustomSettingsObserver(Handler handler) {
+            super(handler);
+        }
+
+        void observe() {
+           mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
+                   Settings.System.ENABLE_HW_KEYS),
+                   false, this, UserHandle.USER_ALL);
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            update();
+        }
+
+        public void update() {
+            int showNavBar = Settings.System.getIntForUser(
+                    mContext.getContentResolver(), Settings.System.ENABLE_HW_KEYS,
+                    -1, mCurrentUserId);
+            if (showNavBar != -1){
+                boolean showNavBarBool = showNavBar == 0;
+                if (showNavBarBool !=  mShowNavBar){
+                    updateNavigationBar();
+                }
+            }
+        }
+    }
+
+    private CustomSettingsObserver mCustomSettingsObserver = new CustomSettingsObserver(mHandler);
+    private boolean mShowNavBar;
+
     @Override
     public void start() {
         mNetworkController = Dependency.get(NetworkController.class);
@@ -959,6 +993,8 @@ public class StatusBar extends SystemUI implements DemoMode,
             }
         };
         Dependency.get(ConfigurationController.class).addCallback(mConfigurationListener);
+        mCustomSettingsObserver.observe();
+        mCustomSettingsObserver.update();
     }
 
     protected void createIconController() {
@@ -7025,4 +7061,20 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
     }
     // End Extra BaseStatusBarMethods.
+
+    private void updateNavigationBar() {
+        mShowNavBar = CustomUtils.deviceSupportNavigationBarForUser(mContext, mCurrentUserId);
+        if (DEBUG) Log.v(TAG, "updateNavigationBar=" + mShowNavBar);
+
+        if (mShowNavBar) {
+            if (mNavigationBarView == null) {
+                createNavigationBar();
+            }
+        } else {
+            if (mNavigationBarView != null){
+                mWindowManager.removeViewImmediate(mNavigationBarView);
+                mNavigationBarView = null;
+            }
+        }
+    }
 }

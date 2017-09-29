@@ -2396,16 +2396,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // Allow the navigation bar to move on non-square small devices (phones).
         mNavigationBarCanMove = width != height && shortSizeDp < 600;
 
-        mHasNavigationBar = res.getBoolean(com.android.internal.R.bool.config_showNavigationBar);
-
-        // Allow a system property to override this. Used by the emulator.
-        // See also hasNavigationBar().
-        String navBarOverride = SystemProperties.get("qemu.hw.mainkeys");
-        if ("1".equals(navBarOverride)) {
-            mHasNavigationBar = false;
-        } else if ("0".equals(navBarOverride)) {
-            mHasNavigationBar = true;
-        }
+        mHasNavigationBar = CustomUtils.deviceSupportNavigationBar(mContext);
 
         // For demo purposes, allow the rotation of the HDMI display to be controlled.
         // By default, HDMI locks rotation to landscape.
@@ -2529,6 +2520,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (mImmersiveModeConfirmation != null) {
                 mImmersiveModeConfirmation.loadSetting(mCurrentUserId);
             }
+            mHasNavigationBar = CustomUtils.deviceSupportNavigationBar(mContext);
         }
         synchronized (mWindowManagerFuncs.getWindowManagerLock()) {
             PolicyControl.reloadFromSetting(mContext);
@@ -6183,6 +6175,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         final boolean canceled = event.isCanceled();
         final int keyCode = event.getKeyCode();
         final int scanCode = event.getScanCode();
+        final boolean virtualKey = event.getDeviceId() == KeyCharacterMap.VIRTUAL_KEYBOARD;
         final boolean isInjected = (policyFlags & WindowManagerPolicy.FLAG_INJECTED) != 0;
 
         // If screen is off then we treat the case where the keyguard is open but hidden
@@ -6221,6 +6214,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 return 0;
             }
         }
+
+        // if mHasHwKeysEnabled is false we have disabled all button rebindings
+        // so we can be sure that events that are !virtuaKey are only for real buttons
+        boolean disableKey = !virtualKey && !mHasHwKeysEnabled;
 
         if (DEBUG_INPUT) {
             Log.d(TAG, "interceptKeyTq keycode=" + keyCode
@@ -6281,7 +6278,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         boolean useHapticFeedback = down
                 && (policyFlags & WindowManagerPolicy.FLAG_VIRTUAL) != 0
-                && event.getRepeatCount() == 0;
+                && event.getRepeatCount() == 0
+                && !disableKey;
 
         // Specific device key handling
         if (mDeviceKeyHandler != null) {
