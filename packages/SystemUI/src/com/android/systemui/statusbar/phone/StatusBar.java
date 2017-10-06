@@ -1,5 +1,3 @@
-
-
 /*
  * Copyright (C) 2010 The Android Open Source Project
  *
@@ -32,6 +30,7 @@ import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARE
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_WARNING;
 
 import android.R.style;
+import android.content.ContentResolver;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.NonNull;
