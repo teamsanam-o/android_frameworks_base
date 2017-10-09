@@ -71,6 +71,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
+import com.android.internal.util.custom.CustomUtils;
 import android.view.Display;
 import android.view.WindowManagerPolicy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -956,6 +957,14 @@ public final class PowerManagerService extends SystemService
             mAutoLowPowerModeConfigured = autoLowPowerModeConfigured;
             updateLowPowerModeLocked();
         }
+
+            boolean showNavBarDefault = CustomUtils.deviceSupportNavigationBar(mContext);
+            boolean navBarEnabled = Settings.System.getInt(resolver,
+                        Settings.System.NAVIGATION_BAR_SHOW, showNavBarDefault ? 1:0) == 1;
+
+	if(showNavBarDefault||navBarEnabled) {
+		mButtonsLight.setBrightness(PowerManager.BRIGHTNESS_OFF);
+	}
 
         mDirty |= DIRTY_SETTINGS;
     }
@@ -2372,6 +2381,16 @@ public final class PowerManagerService extends SystemService
                 mDisplayPowerRequest.dozeScreenState = Display.STATE_UNKNOWN;
                 mDisplayPowerRequest.dozeScreenBrightness = PowerManager.BRIGHTNESS_DEFAULT;
             }
+
+ final ContentResolver resolver = mContext.getContentResolver();
+ boolean showNavBarDefault = CustomUtils.deviceSupportNavigationBar(mContext);
+            boolean navBarEnabled = Settings.System.getInt(resolver,
+                        Settings.System.NAVIGATION_BAR_SHOW, showNavBarDefault ? 1:0) == 1;
+
+        if(showNavBarDefault||navBarEnabled) {
+                mButtonsLight.setBrightness(PowerManager.BRIGHTNESS_OFF);
+        }
+
 
             mDisplayReady = mDisplayManagerInternal.requestPowerState(mDisplayPowerRequest,
                     mRequestWaitForNegativeProximity);

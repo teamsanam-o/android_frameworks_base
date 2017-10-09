@@ -21,6 +21,7 @@ import com.android.server.LocalServices;
 import com.android.server.am.BatteryStatsService;
 import com.android.server.lights.LightsManager;
 
+import com.android.internal.util.custom.CustomUtils;
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.content.Context;
@@ -44,6 +45,10 @@ import android.util.Spline;
 import android.util.TimeUtils;
 import android.view.Display;
 import android.view.WindowManagerPolicy;
+
+import android.content.ContentResolver;
+
+import android.provider.Settings;
 
 import java.io.PrintWriter;
 
@@ -664,6 +669,15 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         if (state == Display.STATE_DOZE || state == Display.STATE_DOZE_SUSPEND) {
             mLights.getLight(LightsManager.LIGHT_ID_BUTTONS).setBrightness(PowerManager.BRIGHTNESS_OFF);
         }
+
+boolean showNavBarDefault = CustomUtils.deviceSupportNavigationBar(mContext);
+final ContentResolver resolver = mContext.getContentResolver();
+boolean navBarEnabled = Settings.System.getInt(resolver,
+                        Settings.System.NAVIGATION_BAR_SHOW, showNavBarDefault ? 1:0) == 1;
+if(showNavBarDefault||navBarEnabled) {
+mLights.getLight(LightsManager.LIGHT_ID_BUTTONS).setBrightness(PowerManager.BRIGHTNESS_OFF);
+}
+
 
         // Configure auto-brightness.
         boolean autoBrightnessEnabled = false;
