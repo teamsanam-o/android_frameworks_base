@@ -1090,6 +1090,11 @@ public class FingerprintManager {
         }
 
         @Override // binder call
+        public void onAcquired(long deviceId, int acquireInfo) {
+           onAcquired(deviceId, acquireInfo, 0);
+        }
+
+        @Override // binder call
         public void onAuthenticationSucceeded(long deviceId, Fingerprint fp, int userId) {
             mHandler.obtainMessage(MSG_AUTHENTICATION_SUCCEEDED, userId, 0, fp).sendToTarget();
         }
@@ -1102,6 +1107,11 @@ public class FingerprintManager {
         @Override // binder call
         public void onError(long deviceId, int error, int vendorCode) {
             mHandler.obtainMessage(MSG_ERROR, error, vendorCode, deviceId).sendToTarget();
+        }
+
+       @Override // binder call
+        public void onError(long deviceId, int error) {
+           onError(deviceId, error, 0);
         }
 
         @Override // binder call
